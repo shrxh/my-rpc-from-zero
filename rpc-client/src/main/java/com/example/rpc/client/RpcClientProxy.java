@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
+import java.util.UUID;
 
 /**
  * 动态代理的核心：
@@ -44,6 +45,7 @@ public class RpcClientProxy implements InvocationHandler {
 
         // 组装请求：接口名 + 方法名 + 参数类型 + 参数值
         RpcRequest request = RpcRequest.builder()
+            .requestId(UUID.randomUUID().toString())
             .interfaceName(method.getDeclaringClass().getName())
             .methodName(method.getName())
             .parameterTypes(method.getParameterTypes())
@@ -60,6 +62,10 @@ public class RpcClientProxy implements InvocationHandler {
             oos.flush();
 
             RpcResponse rpcResponse = (RpcResponse) ois.readObject();
+            // 校验返回的 requestId 是否一致（这在单次 socket 通信里不明显，但在并发长连接里是救命的）
+            if (!rpcResponse.getRequestId().equals(request.getRequestId())) {
+                throw new RuntimeException("requestId 不匹配");
+            }
             if (rpcResponse.getCode() != 200) {
                 throw new RuntimeException("调用服务失败：" + rpcResponse.getMessage());
             }

@@ -6,7 +6,9 @@ package com.example.rpc.server;
 
 import com.example.rpc.common.entity.RpcRequest;
 import com.example.rpc.common.entity.RpcResponse;
+import com.example.rpc.common.service.OrderService;
 import com.example.rpc.common.service.UserService;
+import com.example.rpc.server.service.OrderServiceImpl;
 import com.example.rpc.server.service.UserServiceImpl;
 
 import java.io.ObjectInputStream;
@@ -23,11 +25,11 @@ import java.util.Map;
  * V1 会把它换成一个 Map<String, Object> 服务注册表，从而支持任意接口。
  */
 public class RpcServer {
-    private static final UserService userService = new UserServiceImpl();
-    private static Map<String, Object> serviceMap = new HashMap<>();
-
     public static void main(String[] args) throws Exception {
-        serviceMap.put("com.example.rpc.common.service.UserService", new UserServiceImpl());
+        // 1. 启动时，把所有的服务实现类注册到注册表里
+        ServiceRegistry.register(UserService.class.getName(), new UserServiceImpl());
+        ServiceRegistry.register(OrderService.class.getName(), new OrderServiceImpl());
+
         ServerSocket serverSocket = new ServerSocket(8899);
         System.out.println("RPC 服务端已启动，监听 8899 ...");
 
@@ -44,21 +46,29 @@ public class RpcServer {
                 oos.flush();
 
                 RpcRequest request = (RpcRequest) ois.readObject();
-                System.out.println("收到请求：" + request);
+                System.out.println("收到请求: " + request.getRequestId() + " -> " +
+                    request.getInterfaceName() + "#" + request.getMethodName());
 
                 RpcResponse rpcResponse = null;
                 try {
-                    Object service = serviceMap.get(request.getInterfaceName());
-                    // 反射：根据 methodName + parameterTypes 精确定位方法（重载方法靠 parameterTypes 区分）
+                    // 2. 根据请求的接口名，从注册表里拿实现类
+                    Object service = ServiceRegistry.getService(request.getInterfaceName());
+                    if (service == null) {
+                        throw new RuntimeException("未找到服务: " + request.getInterfaceName());
+                    }
+
+                    // 3. 反射调用
                     Method method =
                         service.getClass().getMethod(request.getMethodName(), request.getParameterTypes());
-                    // invoke：把 userServiceImpl 实例和参数传进去，得到返回值
                     Object result = method.invoke(service, request.getParameters());
                     rpcResponse = RpcResponse.success(result);
                 } catch (Exception e) {
                     e.printStackTrace();
                     rpcResponse = RpcResponse.fail(e.getMessage());
                 }
+
+                // 4. 把 requestId 原样塞回响应里
+                rpcResponse.setRequestId(request.getRequestId());
                 oos.writeObject(rpcResponse);
                 oos.flush();
             }

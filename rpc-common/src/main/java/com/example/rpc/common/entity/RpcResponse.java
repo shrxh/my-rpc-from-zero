@@ -23,6 +23,8 @@ import java.io.Serializable;
 public class RpcResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // 新增：响应带回的请求 ID
+    private String requestId;
     private int code;        // 200 成功，500 失败
     private String message;  // 失败时的异常信息
     private Object data;     // 成功时的返回值

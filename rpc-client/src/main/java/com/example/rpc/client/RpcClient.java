@@ -5,6 +5,7 @@
 package com.example.rpc.client;
 
 import com.example.rpc.common.entity.User;
+import com.example.rpc.common.service.OrderService;
 import com.example.rpc.common.service.UserService;
 
 /**
@@ -14,12 +15,14 @@ import com.example.rpc.common.service.UserService;
 public class RpcClient {
     public static void main(String[] args) {
         RpcClientProxy proxy = new RpcClientProxy();
-        UserService userService = proxy.getProxy(UserService.class);
 
+        UserService userService = proxy.getProxy(UserService.class);
         User user1 = userService.getUserById(1);
         System.out.println("getUserById(1) -> " + user1);
 
-        User user2 = userService.getUserByName("用户1");
-        System.out.println("getUserByName(\"用户1\") -> " + user2);
+
+        OrderService orderService = proxy.getProxy(OrderService.class);
+        String orderResult = orderService.createOrder("1001", "P-888");
+        System.out.println("订单服务结果: " + orderResult);
     }
 }

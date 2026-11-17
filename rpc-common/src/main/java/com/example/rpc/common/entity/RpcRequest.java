@@ -23,6 +23,8 @@ import java.io.Serializable;
 public class RpcRequest implements Serializable {
     public static final long serialVersionUID = 1L;
 
+    // 新增：请求唯一 ID
+    private String requestId;
     private String interfaceName;      // 接口全限定名，如 com.example.rpc.common.service.UserService
     private String methodName;         // 方法名
     private Class<?>[] parameterTypes; // 参数类型数组（Class 本身实现了 Serializable）
