@@ -38,7 +38,7 @@ public class RpcClientProxy implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // toString / equals / hashCode 等 Object 方法不远程调用，本地直接处理
-        if(method.getDeclaringClass() == Object.class) {
+        if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this, args);
         }
 

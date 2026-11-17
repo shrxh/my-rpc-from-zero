@@ -17,7 +17,6 @@ import java.net.Socket;
 
 /**
  * V0 服务端：BIO（阻塞 IO），accept 一个连接 → 读一个 RpcRequest → 反射执行 → 写回 RpcResponse。
- *
  * 这里"硬编码"了 UserServiceImpl，是为了让你先看清反射调用的最小形态。
  * V1 会把它换成一个 Map<String, Object> 服务注册表，从而支持任意接口。
  */
