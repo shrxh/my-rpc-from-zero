@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 服务端执行完反射调用后，把结果（或异常）封装成这个对象回传。
  * V0 还没有 requestId —— 因为一次 Socket 连接只对应一次请求-响应，不需要关联。
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RpcResponse {
+public class RpcResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int code;        // 200 成功，500 失败
