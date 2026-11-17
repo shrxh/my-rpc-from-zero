@@ -14,6 +14,8 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * V0 服务端：BIO（阻塞 IO），accept 一个连接 → 读一个 RpcRequest → 反射执行 → 写回 RpcResponse。
@@ -22,8 +24,10 @@ import java.net.Socket;
  */
 public class RpcServer {
     private static final UserService userService = new UserServiceImpl();
+    private static Map<String, Object> serviceMap = new HashMap<>();
 
     public static void main(String[] args) throws Exception {
+        serviceMap.put("com.example.rpc.common.service.UserService", new UserServiceImpl());
         ServerSocket serverSocket = new ServerSocket(8899);
         System.out.println("RPC 服务端已启动，监听 8899 ...");
 
@@ -44,11 +48,12 @@ public class RpcServer {
 
                 RpcResponse rpcResponse = null;
                 try {
+                    Object service = serviceMap.get(request.getInterfaceName());
                     // 反射：根据 methodName + parameterTypes 精确定位方法（重载方法靠 parameterTypes 区分）
                     Method method =
-                        UserServiceImpl.class.getMethod(request.getMethodName(), request.getParameterTypes());
+                        service.getClass().getMethod(request.getMethodName(), request.getParameterTypes());
                     // invoke：把 userServiceImpl 实例和参数传进去，得到返回值
-                    Object result = method.invoke(userService, request.getParameters());
+                    Object result = method.invoke(service, request.getParameters());
                     rpcResponse = RpcResponse.success(result);
                 } catch (Exception e) {
                     e.printStackTrace();
