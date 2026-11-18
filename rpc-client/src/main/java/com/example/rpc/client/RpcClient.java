@@ -14,7 +14,7 @@ import com.example.rpc.common.service.UserService;
  */
 public class RpcClient {
     public static void main(String[] args) {
-        RpcClientProxy proxy = new RpcClientProxy();
+        NettyRpcClientProxy proxy = new NettyRpcClientProxy();
 
         UserService userService = proxy.getProxy(UserService.class);
         User user1 = userService.getUserById(1);
