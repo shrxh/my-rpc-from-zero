@@ -4,6 +4,8 @@
 
 package com.example.rpc.server;
 
+import com.example.rpc.common.codec.RpcDecoder;
+import com.example.rpc.common.codec.RpcEncoder;
 import com.example.rpc.common.service.OrderService;
 import com.example.rpc.common.service.UserService;
 import com.example.rpc.server.service.OrderServiceImpl;
@@ -14,9 +16,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 
 /**
  * 启动类
@@ -41,9 +40,9 @@ public class NettyRpcServer {
                         // 配置 ChannelPipeline（处理责任链）
                         ch.pipeline()
                             // 解码器：把字节流转成 Java 对象
-                            .addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)))
+                            .addLast(new RpcDecoder())
                             // 编码器：把 Java 对象转成字节流
-                            .addLast(new ObjectEncoder())
+                            .addLast(new RpcEncoder())
                             // 自定义的业务处理器
                             .addLast(new NettyRpcServerHandler());
                     }

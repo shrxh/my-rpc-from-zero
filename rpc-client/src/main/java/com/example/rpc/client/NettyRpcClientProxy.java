@@ -4,6 +4,8 @@
 
 package com.example.rpc.client;
 
+import com.example.rpc.common.codec.RpcDecoder;
+import com.example.rpc.common.codec.RpcEncoder;
 import com.example.rpc.common.entity.RpcRequest;
 import com.example.rpc.common.entity.RpcResponse;
 import io.netty.bootstrap.Bootstrap;
@@ -12,9 +14,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -56,8 +55,8 @@ public class NettyRpcClientProxy implements InvocationHandler {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
-                            .addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)))
-                            .addLast(new ObjectEncoder())
+                            .addLast(new RpcDecoder())
+                            .addLast(new RpcEncoder())
                             .addLast(clientHandler);
                     }
                 });
